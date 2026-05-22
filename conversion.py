@@ -25,7 +25,7 @@ cy_init = 0.0
 cz_init = 0.0
 cw_init = 1.0
 
-class MyNde(Node):
+class MyNode(Node):
 
     def __init__(self):
 
@@ -118,21 +118,65 @@ class MyNde(Node):
 
             self.pub.publish(new_msg)
 
+        else:
+            new_msg = TransformStamped()
+            new_msg.header.stamp = self.get_clock().now().to_msg()
+            new_msg.header.frame_id = 'world'
+            new_msg.child_frame_id = 'robot'
+
+            new_msg.transform.translation.x = 0
+            new_msg.transform.translation.y = 0
+            new_msg.transform.translation.z = 0
+
+            new_msg.transform.rotation.x = 0
+            new_msg.transform.rotation.y = 0
+            new_msg.transform.rotation.z = 0
+            new_msg.transform.rotation.w = 0
+
+            self.pub.publish(new_msg)
+
+
     def esp32_buttons_callback(self, msg):
 
         button_1 = msg.buttons[0]
-        button_2 = msg.buttons[1]
-        button_3 = msg.buttons[2]
-        button_4 = msg.buttons[3]
+
 
         if button_1 == 1:  # If button 1 is pressed
             self.special_button = True
+            button_2 = msg.buttons[1]
+            button_3 = msg.buttons[2]
+            button_4 = msg.buttons[3]
             self.get_logger().info(f"B1: {button_1}, B2: {button_2}, B3: {button_3}, B4: {button_4} - Special button activated!")
         else:
             self.special_button = False
+            button_2 = 0
+            button_3 = 0
+            button_4 = 0
             self.get_logger().info(f"B1: {button_1}, B2: {button_2}, B3: {button_3}, B4: {button_4} - Special button deactivated.")
 
         
+
+
+def main(args=None):
+
+    rclpy.init(args=args)
+
+    node = MyNode()
+
+    try:
+        rclpy.spin(node)
+
+    except KeyboardInterrupt:
+        pass
+
+    node.destroy_node()
+
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
+
 
 
 
